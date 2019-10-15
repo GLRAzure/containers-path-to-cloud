@@ -240,7 +240,8 @@ NAME        TYPE           CLUSTER-IP    EXTERNAL-IP     PORT(S)        AGE
 hello-app   LoadBalancer   10.0.124.30   13.68.182.120   80:31005/TCP   104s
 ```
 
-The application should be responding on the EXTERNAL-IP address listed from the `get service` command. Now open a web browser and test the app.
+The application should be responding on the EXTERNAL-IP address listed from the `get service` command. Now open a web browser and test the app. You should see a hello world message with the 9x Node.js runtime version:
+![](assets/browser-test-app.png)
 
 ## Exercise 4 - Examine cluster resources
 
@@ -306,3 +307,58 @@ hello-app   4/4     4            4           27m
 If you run this command soon after the `apply` command, you'll see the ready count increase until it meets the four replicas we requested.
 
 ## Exercise 5 - Deploy a rolling update
+
+We're ready to update our application to the next version! This this update, we are simply updating the version of Node.js our app uses.
+
+In the Azure Cloud Shell:
+
+```console
+code Dockerfile
+```
+
+Our Dockerfile should be updated as follows (note the node version change on the first line):
+
+```dockerfile
+FROM    node:10-alpine
+ADD     https://raw.githubusercontent.com/Azure-Samples/acr-build-helloworld-node/master/package.json /
+ADD     https://raw.githubusercontent.com/Azure-Samples/acr-build-helloworld-node/master/server.js /
+RUN     npm install
+EXPOSE  80
+CMD     ["node", "server.js"]
+```
+
+Save and close the changes. Build a new conatiner image using a v2 version tag (don't forget the . at the end!)
+
+```console
+$ az acr build --registry $ACR_NAME --image helloacrtasks:v2 .
+```
+
+We now have the v2 version of our application in our ACR. Now to deploy that update to our Kubernetes cluster. Edit the `hello-app.yaml'
+manifest, updating the image name to v2 (do not change the manifest apiVersion elsewhere in the document -- that should remain v1)
+
+```yaml
+image: akacr2.azurecr.io/helloacrtasks:v1
+```
+
+Now apply the new manifest:
+
+```console
+$ kubectl apply -f hello-app.yaml
+deployment.apps/hello-app configured
+service/hello-app unchanged
+```
+
+If we check the running pods, we can see that all of them have been replaced with new ones running the new version of our app:
+
+```console
+$ kubectl get pods
+NAME                       READY   STATUS    RESTARTS   AGE
+hello-app-5c6cfbf9-4nx9c   1/1     Running   0          54s
+hello-app-5c6cfbf9-5h9z4   1/1     Running   0          47s
+hello-app-5c6cfbf9-dpmgw   1/1     Running   0          47s
+hello-app-5c6cfbf9-k26f4   1/1     Running   0          54s
+```
+
+You can check the version of the running code in the browser and see the new version of the app is indeed running, sporting the 10.x Node.js runtime:
+
+![](assets/browser-updated-app.png)
