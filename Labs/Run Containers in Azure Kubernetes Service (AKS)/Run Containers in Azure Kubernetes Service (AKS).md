@@ -133,7 +133,7 @@ $ az aks update -n <your-cluster-name> -g learn-aks-rg --attach-acr $ACR_NAME
 AAD role propagation done[############################################]  100.0000%
 ```
 
-### 3. Set up the Kuberntes CLI and connect to your cluster
+### 3. Set up the Kubernetes CLI and connect to your cluster
 
 Our Kubernetes cluster is now running but we don't have a way to communicate with it yet. The Kubernetes CLI (called `kubectl`) is already installed in Cloud Shell. If you need to install it in case you're running locally or on a VM, the following command
 will install it:
@@ -228,7 +228,7 @@ service/hello-app created
 How let's watch the service get deployed and see the endpoint. The `--watch` option will keep refreshing the output as it changes. We are watching the service because that's the network path from outside the cluster to the running containers in the cluster. We'll explore how this was actually done for us later.
 
 ```console
-$ kubectl get service hello-app --watch
+kubectl get service hello-app --watch
 ```
 
 (press Control-C to stop the `watch`)
@@ -270,7 +270,7 @@ communication. We can also see a Public IP Address and Load Balancer. These are 
 
 ## Exercise 4 - Scale the application
 
-Now our application has become popular and we need to add capacity. Kubernetes' powerful declartive configuration model makes it easy. First, let's look at our cluster
+Now our application has become popular and we need to add capacity. Kubernetes' powerful declarative configuration model makes it easy. First, let's look at our cluster
 size and deployment scale:
 
 ```console
@@ -327,10 +327,10 @@ EXPOSE  80
 CMD     ["node", "server.js"]
 ```
 
-Save and close the changes. Build a new conatiner image using a v2 version tag (don't forget the . at the end!)
+Save and close the changes. Build a new container image using a v2 version tag (don't forget the . at the end!)
 
 ```console
-$ az acr build --registry $ACR_NAME --image helloacrtasks:v2 .
+az acr build --registry $ACR_NAME --image helloacrtasks:v2 .
 ```
 
 We now have the v2 version of our application in our ACR. Now to deploy that update to our Kubernetes cluster. Edit the `hello-app.yaml'
