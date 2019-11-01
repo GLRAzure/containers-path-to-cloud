@@ -169,45 +169,45 @@ are usually written in the YAML markup format. For this application our manifest
 - Service: An inbound connection to a Deployment
 
 ```YAML
+# Deployment for the Hello Service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: azure-vote-back
+  name: hello-1-0
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
-      app: azure-vote-back
+      app: hello
+      version: "1.0"
   template:
     metadata:
       labels:
-        app: azure-vote-back
+        app: hello
+        version: "1.0"
     spec:
-      nodeSelector:
-        "beta.kubernetes.io/os": linux
       containers:
-      - name: azure-vote-back
-        image: redis
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 250m
-            memory: 256Mi
-        ports:
-        - containerPort: 6379
-          name: redis
+        - name: hello
+          image: <YOUR_ACR_URL>/<YOUR_IMAGE_NAME>:<YOUR_IMAGE_TAG>
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
 ---
+# Service definition for the Hello API
 apiVersion: v1
 kind: Service
 metadata:
-  name: azure-vote-back
+  name: hello
+  labels:
+    app: hello
 spec:
   ports:
-  - port: 6379
+    - port: 80
+      name: http
   selector:
-    app: azure-vote-back
+    app: hello
+  type: LoadBalancer
 ```
 
 You can download a copy of this file [here](assets/hello-app.yaml)
